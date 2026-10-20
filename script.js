@@ -78,8 +78,8 @@ $('#miss').onclick=e=>{const k=e.target.closest('.mk');if(k){openPs(+k.dataset.i
 const RO={50:[["Halfway there","Half your list is done. The other half is getting nervous."],["50% done","Your sofa just filed a formal complaint. Keep going."],["Halfway!","You did half. The other half is staring at you."]],75:[["75% done","Show-off. Finish the last bit and take a bow."],["Almost there","Don't ghost your own streak now."],["So close","Three quarters down. The last few tasks are shaking."]]};
 function roast(){const tp=S.habits.length+5,dn=(S.log[todayK]||[]).filter(id=>S.habits.some(h=>h.id===id)).length+(S.salah[todayK]||[]).length,pc=dn/tp*100,f=S.fired[todayK]||(S.fired[todayK]=[]);
  const hit=[75,50].find(t=>pc>=t&&!f.includes(t));if(!hit)return;[50,75].forEach(t=>{if(t<=hit&&!f.includes(t))f.push(t)});save();
- const m=RO[hit][Math.floor(Math.random()*3)],el=$('#roast');$('#rp').textContent=hit+'%';$('#rh').textContent=m[0];$('#rm').textContent=m[1];
- el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(roast.t);roast.t=setTimeout(()=>el.classList.remove('show'),5500)}
+ const m=RO[hit][Math.floor(Math.random()*3)],el=$('#roast');$('#rp').textContent=hit+'%';{const C=138.2,v=C*hit/100;$('#rrg').style.strokeDasharray=v.toFixed(1)+' '+C;el.style.setProperty('--rc',hit===50?'var(--jade)':'var(--gold)')}$('#rh').textContent=m[0];$('#rm').textContent=m[1];
+ el.onclick=()=>el.classList.remove('show');el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(roast.t);roast.t=setTimeout(()=>el.classList.remove('show'),5500)}
 function celebrate(){if(count(todayK)<5||S.cel[todayK])return false;S.cel[todayK]=1;save();
  setTimeout(()=>{$('#roast').classList.remove('show');const n=Math.max(streak(),1),t=new Date(),mon=new Date(t);mon.setDate(t.getDate()-((t.getDay()+6)%7));let dn=0;
   $('#scenc').textContent=n===1?"Day one is done. Come back tomorrow to keep it going.":n<7?"You're building a beautiful habit.":"You're on fire! Keep it going.";
@@ -144,8 +144,7 @@ function pMind(){const hs=hab('mind'),ds=lastDays(14),scs=ds.map(d=>sc('mind',ke
 function rAn(){$('#ansel').innerHTML=Object.entries(ANC).map(([k,v])=>`<button class="anb ${k===anCat?'on':''}" data-c="${k}" style="--c:${v.c}"><span class="ai">${I(v.i)}</span><b>${v.n}</b><small>${Math.round(wav(k,7,0)*100)}% this week</small></button>`).join('');
  const p=$('#anp');p.style.setProperty('--c',ANC[anCat].c);p.innerHTML=`<div class="anw">${({deen:pDeen,body:pBody,mind:pMind})[anCat]()}</div>`}
 $('#ansel').onclick=e=>{const b=e.target.closest('.anb');if(b){anCat=b.dataset.c;rAn()}};
-function rStats(){const jt=Object.values(S.jam).reduce((a,x)=>a+x.length,0),xp=total()*10+jt*5,lv=Math.floor(xp/100)+1;
- $('#lv').textContent=lv;$('#xpb').style.width=(xp%100)+'%';$('#xpt').textContent=`${xp%100} / 100 XP to level ${lv+1}`;$('#s1').textContent=best();$('#s2').textContent=total();rAn()}
+function rStats(){rAn();rPlan()}
 function all(){rToday();rSalah();rStats();save()}
 $('#strip').onclick=e=>{const b=e.target.closest('.day');if(b){cur=b.dataset.k;all()}};
 $('#pager').onclick=e=>{const d=e.target.closest('.del');
@@ -171,9 +170,46 @@ $('#nm').addEventListener('keydown',e=>{if(e.key==='Enter')$('#save').click()});
 $('#sx').onclick=closeAdd;
 $('#save').onclick=()=>{const v=$('#nm').value.trim();if(!v){toast('Enter a name for your habit');return}
  S.habits.push({id:Date.now(),name:v,ic:ni,cat:nc});$('#nm').value='';closeAdd();all();$('#pager').scrollTo({left:(nc==='deen'?0:1)*$('#pager').clientWidth,behavior:'smooth'});toast('Habit added')};
-const h=new Date().getHours();$('#greet').textContent=h<12?'Sabah al-khair':h<18?'Assalamu alaikum':'Masa al-khair';
+const setGreet=()=>{const h=new Date().getHours();$('#greet').textContent=(h<12?'Sabah al-khair':h<18?'Assalamu alaikum':'Masa al-khair')+(S.profile&&S.profile.name?', '+S.profile.name:'')};setGreet();
 $('#fl').innerHTML=I('flame');$('#pl').innerHTML=I('plus');$('#rsi').innerHTML=I('reset');$('#chv').innerHTML=I('chev');
 document.querySelectorAll('[data-ic]').forEach(e=>e.innerHTML=I(e.dataset.ic));
 $('#tabs').onclick=e=>{const b=e.target.closest('button');if(b)$('#pager').scrollTo({left:+b.dataset.p*$('#pager').clientWidth,behavior:'smooth'})};
 $('#pager').addEventListener('scroll',()=>{const p=$('#pager'),i=Math.round(p.scrollLeft/p.clientWidth);[...$('#tabs').children].forEach((b,j)=>b.classList.toggle('on',j===i))},{passive:true});
+const GOALS=[{k:'salah',t:'Never miss a prayer',s:'Pray all five on time',i:'kaaba'},{k:'quran',t:"Connect with the Qur'an",s:'Read a little every day',i:'book'},{k:'health',t:'Get healthier',s:'Move, hydrate and sleep better',i:'pulse'},{k:'mind',t:'Calm my mind',s:'Journal and cut screen time',i:'mind'}];
+const fmt12=t=>{const[h,m]=t.split(':').map(Number);return`${h%12||12}:${pad(m)} ${h<12?'AM':'PM'}`};
+const OB={step:0,edit:false,d:{name:'',sleep:'22:30',wake:'05:00',goal:''}},OBC=['var(--jade)','var(--lilac)','var(--gold)','var(--jade)'];
+const timeUI=k=>`<div class="obmid"><div class="whl"><div class="wc"><div class="wcol" data-n="24" data-k="h"></div><i class="wl t"></i><i class="wl b"></i></div><div class="wc"><div class="wcol" data-n="60" data-k="m"></div><i class="wl t"></i><i class="wl b"></i></div></div></div><div class="obcap" id="obcap"></div>`;
+const OBS=[
+ {ic:'user',t:'What should we call you?',s:'Your name makes Mizan feel personal.',body:()=>`<div class="obmid"><input class="obin" id="obn" placeholder="Your name" maxlength="24" value="${esc(OB.d.name)}" autocomplete="given-name" enterkeyhint="next"></div>`,ok:()=>OB.d.name.trim().length>0},
+ {ic:'moon',t:'When do you usually sleep?',s:'We will keep your sleep habit realistic.',body:()=>timeUI('sleep'),ok:()=>true},
+ {ic:'sun',t:'When do you usually wake up?',s:'Early mornings leave room for Fajr.',body:()=>timeUI('wake'),ok:()=>true},
+ {ic:'star',t:'What is your goal with Mizan?',s:'Pick the one that matters most right now.',body:()=>'<div class="obmid">'+GOALS.map(g=>`<button class="gopt ${OB.d.goal===g.k?'on':''}" data-k="${g.k}"><div class="ic">${I(g.i)}</div><div class="t"><b>${g.t}</b><small>${g.s}</small></div><div class="ck">${I('check')}</div></button>`).join('')+'</div>',ok:()=>!!OB.d.goal}];
+const ROW=52;
+function initWheels(){const k=OB.step===1?'sleep':'wake',cap=$('#obcap');let[hh,mm]=OB.d[k].split(':').map(Number);const upd=()=>{OB.d[k]=`${pad(hh)}:${pad(mm)}`;cap.textContent=(k==='sleep'?'Sleep time: ':'Wake-up time: ')+fmt12(OB.d[k])};upd();
+ document.querySelectorAll('.wcol').forEach(col=>{const n=+col.dataset.n,isH=col.dataset.k==='h',v=isH?hh:mm;
+  col.innerHTML=Array.from({length:n*3},(_,i)=>`<div class="wi">${pad(i%n)}</div>`).join('');
+  let last=-1,t;const mark=i=>{if(i===last)return;if(col.children[last])col.children[last].classList.remove('sel');if(col.children[i])col.children[i].classList.add('sel');last=i};
+  requestAnimationFrame(()=>{col.scrollTop=(n+v)*ROW;mark(n+v)});
+  col.addEventListener('scroll',()=>{mark(Math.round(col.scrollTop/ROW));clearTimeout(t);t=setTimeout(()=>{let j=Math.round(col.scrollTop/ROW);if(j<n){col.scrollTop+=n*ROW;j+=n}else if(j>=2*n){col.scrollTop-=n*ROW;j-=n}mark(j);if(isH)hh=j%n;else mm=j%n;upd()},140)},{passive:true});
+  col.addEventListener('click',e=>{const it=e.target.closest('.wi');if(it)col.scrollTo({top:[...col.children].indexOf(it)*ROW,behavior:'smooth'})})})}
+function obRender(){const st=OBS[OB.step],last=OB.step===OBS.length-1,c=$('#obc');c.style.setProperty('--c',OBC[OB.step]);c.style.animation='none';void c.offsetWidth;c.style.animation='';
+ c.innerHTML=`<div class="obtop">${OB.step?`<button class="obback" id="obb" aria-label="Back">${I('chev')}</button>`:(OB.edit?`<button class="obx" id="obxx" aria-label="Close">${I('close')}</button>`:'<span style="width:42px"></span>')}<div class="obdots">${OBS.map((_,i)=>`<i class="${i<=OB.step?'on':''}"></i>`).join('')}</div><span style="width:42px"></span></div><h2>${st.t}</h2><p class="obs">${st.s}</p>${st.body()}<button class="obgo" id="obgo" ${st.ok()?'':'disabled'}>${last?'Finish':'Next'}</button>`;if(OB.step===1||OB.step===2)initWheels()}
+function obOpen(edit){OB.edit=edit;OB.step=0;const p=S.profile;if(p)OB.d={name:p.name,sleep:p.sleep,wake:p.wake,goal:p.goal};$('#ob').classList.add('show');$('#ob').scrollTop=0;obRender()}
+function obNext(){if(OB.step===1||OB.step===2){const c=[...document.querySelectorAll('.wcol')];if(c.length===2)OB.d[OB.step===1?'sleep':'wake']=pad(Math.round(c[0].scrollTop/ROW)%24)+':'+pad(Math.round(c[1].scrollTop/ROW)%60)}
+ if(OB.step<OBS.length-1){OB.step++;obRender();return}obDone()}
+function obDone(){S.profile={name:OB.d.name.trim(),sleep:OB.d.sleep,wake:OB.d.wake,goal:OB.d.goal,done:1};const h6=S.habits.find(x=>x.id===6);if(h6){h6.name='Sleep by '+fmt12(OB.d.sleep);h6.sub='Wake up at '+fmt12(OB.d.wake)}
+ setGreet();$('#ob').classList.remove('show');all();if(OB.edit)toast('Profile updated');else startSk()}
+$('#ob').addEventListener('click',e=>{const t=e.target;
+ if(t.closest('#obb')){OB.step--;obRender();return}
+ if(t.closest('#obxx')){$('#ob').classList.remove('show');return}
+ const go=t.closest('.gopt');if(go){OB.d.goal=go.dataset.k;document.querySelectorAll('.gopt').forEach(x=>x.classList.toggle('on',x===go));$('#obgo').disabled=false;return}
+ if(t.closest('#obgo'))obNext()});
+$('#ob').addEventListener('input',e=>{if(e.target.id==='obn'){OB.d.name=e.target.value;$('#obgo').disabled=!OB.d.name.trim()}});
+$('#ob').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='obn'&&OB.d.name.trim())obNext()});
+function rPlan(){const p=S.profile;if(!p){$('#pcard').innerHTML='';return}const g=GOALS.find(x=>x.k===p.goal);
+ $('#pcard').innerHTML=[['Name',p.name],['Goal',g?g.t:'-'],['Sleep',fmt12(p.sleep)],['Wake up',fmt12(p.wake)]].map(([a,b])=>`<div class="pr2"><span>${a}</span><b>${esc(b)}</b></div>`).join('')}
+$('#pedit').onclick=()=>obOpen(true);
+const startSk=()=>{const k=$('#sk');k.classList.remove('out');k.classList.add('show');setTimeout(()=>{k.classList.add('out');setTimeout(()=>k.classList.remove('show','out'),380)},1500)};
 all();setInterval(tick,30000);
+if(!(S.profile&&S.profile.done))obOpen(false);
+
